@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: store-presence-api
+    root: server
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+    disk:
+      name: presence-data
+      mountPath: /opt/render/project/src/server/data
+      sizeGB: 1
+    healthCheckPath: /api/health
+
+  - type: static
+    name: store-presence-web
+    root: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://store-presence-api.onrender.com/api
