@@ -10,10 +10,6 @@ services:
       - key: NODE_VERSION
         value: "20"
     healthCheckPath: /api/health
-    disk:
-      name: presence-data
-      mountPath: /opt/render/project/src/server/data
-      sizeGB: 1
 
   - type: web
     name: digital-presence-frontend
