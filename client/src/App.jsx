@@ -16,6 +16,7 @@ import {
 import logo from './assets/decathlon-logo.png';
 
 const tabs = [
+  { id: 'exec', label: 'Vue flash' },
   { id: 'overview', label: 'Synthèse (vue globale)' },
   { id: 'presence', label: 'Présence' },
   { id: 'teams', label: 'Par équipe' },
@@ -190,6 +191,14 @@ function App() {
     return employees.filter((emp) => (presenceTeamFilter ? emp.teamId === Number(presenceTeamFilter) : true));
   }, [employees, presenceTeamFilter]);
 
+  const dashboardStats = useMemo(() => {
+    const activeCount = employees.filter((emp) => emp.active !== false).length;
+    const presenceRate = summary && activeCount ? Math.round((summary.totalPresent / activeCount) * 100) : 0;
+    const topTeams = summary ? [...summary.perTeam].sort((a, b) => b.presentCount - a.presentCount).slice(0, 3) : [];
+    const lowTeams = summary ? summary.perTeam.filter((team) => team.presentCount === 0) : [];
+    return { activeCount, presenceRate, topTeams, lowTeams };
+  }, [employees, summary]);
+
   return (
     <div className="app">
       <header className="topbar">
@@ -228,6 +237,87 @@ function App() {
         <div className="notice" onClick={() => setMessage('')}>
           {message}
         </div>
+      )}
+
+      {!loading && activeTab === 'exec' && summary && (
+        <section className="grid exec-grid">
+          <div className="panel highlight">
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Vue flash</p>
+                <h2>Opération en cours</h2>
+              </div>
+              <span className="dot online" />
+            </div>
+            <div className="kpi-grid">
+              <div className="kpi">
+                <p className="eyebrow">Présents</p>
+                <p className="metric">{summary.totalPresent}</p>
+                <p className="muted">Sur {dashboardStats.activeCount || '—'} actifs</p>
+              </div>
+              <div className="kpi">
+                <p className="eyebrow">Taux présence</p>
+                <p className="metric">{dashboardStats.presenceRate}%</p>
+                <p className="muted">Actifs marqués présents</p>
+              </div>
+              <div className="kpi">
+                <p className="eyebrow">EPI / SST</p>
+                <p className="metric">{summary.epiPresent} / {summary.sstPresent}</p>
+                <p className="muted">Compétences critiques</p>
+              </div>
+              <div className="kpi">
+                <p className="eyebrow">Visiteurs</p>
+                <p className="metric">{summary.visitorsPresent}</p>
+                <p className="muted">Dans le magasin</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="panel stretch">
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Top équipes</p>
+                <h2>Couverture immédiate</h2>
+              </div>
+            </div>
+            <div className="mini-list">
+              {dashboardStats.topTeams.map((team, idx) => (
+                <div key={team.teamId} className="mini-row">
+                  <div className="rank">{idx + 1}</div>
+                  <div className="stack">
+                    <strong>{team.teamName}</strong>
+                    <p className="muted">{team.presentCount} présents</p>
+                  </div>
+                </div>
+              ))}
+              {dashboardStats.topTeams.length === 0 && <p className="muted">Aucune équipe trouvée.</p>}
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Alertes</p>
+                <h2>Équipes à surveiller</h2>
+              </div>
+            </div>
+            {dashboardStats.lowTeams.length === 0 ? (
+              <p className="muted">Pas d'alerte détectée.</p>
+            ) : (
+              <div className="mini-list">
+                {dashboardStats.lowTeams.map((team) => (
+                  <div key={team.teamId} className="mini-row caution">
+                    <div className="dot offline" />
+                    <div className="stack">
+                      <strong>{team.teamName}</strong>
+                      <p className="muted">0 présent</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
       {loading && <div className="panel">Chargement...</div>}
