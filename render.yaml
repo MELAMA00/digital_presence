@@ -1,25 +1,26 @@
 services:
   - type: web
-    name: store-presence-api
-    root: server
+    name: digital-presence-api
     env: node
-    plan: starter
+    rootDir: server
     buildCommand: npm install
     startCommand: node src/index.js
+    plan: free
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: "20"
+    healthCheckPath: /api/health
     disk:
       name: presence-data
       mountPath: /opt/render/project/src/server/data
       sizeGB: 1
-    healthCheckPath: /api/health
 
-  - type: static
-    name: store-presence-web
-    root: client
+  - type: static_site        # ⬅️ IMPORTANT: static_site (NOT "static")
+    name: digital-presence-frontend
+    rootDir: client
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://store-presence-api.onrender.com/api
+        # tu ajusteras après avec la vraie URL de l’API
+        value: https://digital-presence-api.onrender.com/api
