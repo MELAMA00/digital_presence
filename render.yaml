@@ -15,7 +15,7 @@ services:
       mountPath: /opt/render/project/src/server/data
       sizeGB: 1
 
-  - type: static_site
+  - type: static
     name: digital-presence-frontend
     rootDir: client
     buildCommand: npm install && npm run build
