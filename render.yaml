@@ -3,9 +3,9 @@ services:
     name: digital-presence-api
     env: node
     rootDir: server
+    plan: free
     buildCommand: npm install
     startCommand: node src/index.js
-    plan: free
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -15,12 +15,11 @@ services:
       mountPath: /opt/render/project/src/server/data
       sizeGB: 1
 
-  - type: static_site        # ⬅️ IMPORTANT: static_site (NOT "static")
+  - type: static_site
     name: digital-presence-frontend
     rootDir: client
     buildCommand: npm install && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        # tu ajusteras après avec la vraie URL de l’API
         value: https://digital-presence-api.onrender.com/api
